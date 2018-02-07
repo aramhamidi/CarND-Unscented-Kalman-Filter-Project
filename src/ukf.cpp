@@ -175,10 +175,7 @@ void UKF::Prediction(float delta_t) {
     Xsig_pred_.fill(0.0);
     SigmaPointPrediction(&Xsig_pred_, Xsig_aug, delta_t);
     VectorXd Xpred = VectorXd(n_x_);
-    Xpred.fill(0.0);
-    MatrixXd Ppred = MatrixXd(n_x_, n_x_);
-    Ppred.fill(0.0);
-    PredictMeanAndCovariance(&Xpred, &Ppred, Xsig_pred_);
+    PredictMeanAndCovariance(&x_, &P_, Xsig_pred_);
 }
 
 /**
@@ -195,11 +192,7 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
   You'll also need to calculate the lidar NIS.(Normalized Innovation Squared)
   */
     int n_z = 2;
-    /*VectorXd z = VectorXd(n_z);
-    if (meas_package.sensor_type_ == MeasurementPackage::LASER){
-	    z = meas_package.raw_measurements_ ;
-    }
-     */
+
     //mean predicted measurement
     VectorXd Zpred = VectorXd(n_z);
     Zpred.fill(0.0);
@@ -230,11 +223,7 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
 
     //set measurement dimension, radar can measure r, phi, and r_dot
     int n_z = 3;
-    /*VectorXd z = VectorXd(n_z);
-    if (meas_package.sensor_type_ == MeasurementPackage::RADAR){
-	    z = meas_package.raw_measurements_ ;
-    }
-     */
+
     //mean predicted measurement
     VectorXd Zpred = VectorXd(n_z);
     Zpred.fill(0.0);
@@ -245,7 +234,6 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
     MatrixXd Zsig_ = MatrixXd(n_z, 2 * n_aug_ + 1);
     Zsig_.fill(0.0);
     PredictRadarMeasurement(&Zpred,&Spred, &Zsig_);
-    //UpdateState(n_z, Zpred, Spred, z, Zsig_, meas_package);
     UpdateState(n_z, Zpred, Spred, Zsig_, meas_package);
 
 }
@@ -318,8 +306,7 @@ void UKF::SigmaPointPrediction(MatrixXd* Xsig_pred_, const MatrixXd Xsig_out, fl
     //create matrix with predicted sigma points as columns
     MatrixXd Xsig_pred = MatrixXd(n_x_, 2 * n_aug_ + 1);
     Xsig_pred.fill(0.0);
-    //double delta_t = 0.1; //time diff in sec
-
+    
     //predict sigma points
     for (int i = 0; i< 2*n_aug_+1; i++)
     {
@@ -588,7 +575,4 @@ void UKF::UpdateState(int n_z, const VectorXd z_out, const MatrixXd S_out, const
     std::cout << "Updated state x: " << std::endl << x_ << std::endl;
     std::cout << "Updated state covariance P: " << std::endl << P_ << std::endl;
 
-    //write result
-    //*x_out = x_;
-    //*P_out = P_;
 }
